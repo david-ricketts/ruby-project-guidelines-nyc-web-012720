@@ -1,19 +1,29 @@
 require_relative '../config/environment'
 
 
-# def restaurant_code
-#     puts "Welcome please enter the name of the restaurant"
-#     restaurant = gets.chomp
-#     Restaurant.find_or_create_by(name: restaurant)
-#     puts "Welcome to #{restaurant} portal, How may I assist you?"
-#     restaunt_loop(restaurant)
-# end
+
+
+def pizza_shop
+    puts "Hello, are you a guest or the owner?"
+    input = gets.chomp
+    if input == "guest"
+        customer_prompt()
+    else
+        restaurant_prompt()
+    end
+end
+
+
+def restaurant_prompt
+    puts "Welcome please enter the name of the restaurant"
+    restaurant = gets.chomp
+    puts "Welcome to #{restaurant} portal, How may I assist you?"
+    restaunt_loop(restaurant)
+end
 
 
 
-
-
-def customer_code
+def customer_prompt
     puts "Welcome please enter you name"
     customer = gets.chomp
     Customer.find_or_create_by(name: customer)
@@ -24,7 +34,7 @@ end
 
 def customer_loop(person_ordering, total = 0)
     
-    person = Customer.find_or_create_by(name: person_ordering)
+    person_obj = Customer.find_or_create_by(name: person_ordering)
     restaurant = Restaurant.find_or_create_by(name: "Tonys")
     
     puts "Press 1 to get a cheese slice \n
@@ -34,8 +44,6 @@ def customer_loop(person_ordering, total = 0)
     Press 5 to exit"
     
     request = gets.chomp
-
-    # binding.pry
     case(request)
     when "1"
         total += 2
@@ -44,21 +52,22 @@ def customer_loop(person_ordering, total = 0)
         total += 3
         puts "One pepperoni slice added"
     when "3"
-        puts "Your current total is #{total}"
+        puts "Your current total is $#{total}"
     when "4"
-        
-        new_bank_account = person.bank_account - total
-        if new_bank_account < 0 
+        new_balance = person_obj.bank_account
+        new_balance -= total
+        if  new_balance < 0 
             p "No free pizza, goodbye"
         else
-        person.update(bank_account: new_bank_account)
+        person_obj.update(bank_account: new_balance)
         Receipt.create(
-            customer_id: person.first,
-            restaurant_id: restaurant.first,
+            customer_id: person_obj.id,
+            restaurant_id: restaurant.id,
             total: total
             )
         p "$#{total!}, Thank you and enjoy the pizza :-)"
         end
+        binding.pry
     when "5"
         return
     end
@@ -68,37 +77,27 @@ end
 
 
 
-# def restaunt_loop (restaurant)
-#     puts "Press 1 to get receipts \n
-#     Press 2 refund last receipt \n"
+def restaunt_loop (restaurant = "Tonys")
+    restaurant_obj = Restaurant.find_or_create_by(name: restaurant)
+    puts "Press 1 to get receipts \nPress 2 refund last receipt \nPress 3 to exit"
+    
+    request = gets.chomp
+    
+    case(request)
+    when "1"
+        the_receipts = restaurant_obj.get_receipts
+        p the_receipts
+    when "2"
+        restaurant_obj.refund
 
-#     request = gets.chomp
-
-
-#  while request == 1 do
-#         self.receipts
-#     while request == 2 do
-#         self.refund
-#     while request == 3 do
-#         puts "Your current total is #{total}"
-#         request = 0
-#     while request == 4 do
-#         new_bank_account = person_ordering.bank_account - total
-#         if new_bank_account < 0 
-#             p "No free pizza, goodbye"
-        
-#         person_ordering.update(bank_account: new_bank_account)
-#         p "$#{total}, Thank you and enjoy the pizza :-)"
-#     while request == 5 do
-#         return
-#     end
-#     restaunt_loop(restaurant)
-# end
-
+    when "3"
+        return
+    end
+    restaunt_loop(restaurant)
+end
 
 # puts "Hello world"
 
-customer_code
-
+pizza_shop
 
 
